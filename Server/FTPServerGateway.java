@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------*
- * FTPServerGateway.java                                               *
+ * FTPServer.java                                                      *
  * --------------------------------------------------------------------*
  * Description - This class acts as the gateway to allow connections   *
  * to be made to the ftp server. It creates session objects to manage  *
@@ -28,7 +28,7 @@ import java.util.* ;
 //===================================================================//
 // Class Definition                                                  //
 //===================================================================//
-public final class FTPServerGateway {
+public final class FTPServer {
     
     //---------------------------------------------------------------//
     // Class Atributes                                               //
