@@ -47,6 +47,9 @@ final class FTPSession implements Runnable
     /* The socket that we want to open.                              */ 
     Socket socket = null; 
     
+    /* The parameter that is passed with the variable.               */
+    private String [] params; 
+    
     //---------------------------------------------------------------//
     // Constructor/Destructors                                       //
     //---------------------------------------------------------------//
@@ -90,7 +93,7 @@ final class FTPSession implements Runnable
                         break;
                     
                     case CONNECT: 
-                    
+                     
                         break;
                     
                     case LIST: 
@@ -136,7 +139,26 @@ final class FTPSession implements Runnable
      *****************************************************************/
     private FTPState parseIncomming () {
         
+        // 1. Read in the data.
+        
+        // 2. Slice and Dice the payload.
+        
+        // 3. Bulid Params array.
+        
+        // 4. Set the state. 
+        
         return null;
+    }
+    
+    
+    /******************************************************************
+     * @Description - Called to send data back to the client. 
+     *
+     * @return payload - A byte array of the data to be sent back. 
+     *
+     *****************************************************************/
+    private void sendResponse (byte [] payload) {
+        
     }
     
 }
