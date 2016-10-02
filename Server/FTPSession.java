@@ -48,7 +48,7 @@ final class FTPSession implements Runnable
     Socket socket = null; 
     
     /* The parameter that is passed with the variable.               */
-    private String [] params; 
+    private ArrayList<String> params; 
     
     //---------------------------------------------------------------//
     // Constructor/Destructors                                       //
@@ -93,23 +93,23 @@ final class FTPSession implements Runnable
                         break;
                     
                     case CONNECT: 
-                     
+                        // TODO: Josh
                         break;
                     
                     case LIST: 
-                    
+                        // TODO: Kristian
                         break;
                     
                     case RETR: 
-                    
+                        // TODO: Kristian
                         break;
                     
                     case STORE: 
-                    
+                        // TODO: Kristian
                         break;
                     
                     case QUIT: 
-                    
+                        // TODO: Josh
                         isActive = false;
                         break;
                 }
@@ -137,17 +137,51 @@ final class FTPSession implements Runnable
      * @return FTPState - the next state our ftp server should be in. 
      *
      *****************************************************************/
-    private FTPState parseIncomming () {
+    private FTPState parseIncomming () throws Exception {
+        
+      
+        // --- Variable Declarations  -------------------------------//
+        
+        /* The tokenizer used to break apart the request.           */
+        StringTokenizer tokenizer = null;
+        
+        /* The string variable to store input data into.            */
+        String inCommand = "";
+    
+        /* The input buffer to pull all the data from.              */
+        InputStream stream = socket.getInputStream ();
+        
+        /* The buffer reader used to pull in the data.              */
+        BufferedReader inRead = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        
+        // --- Main Routine ----------------------------------------//
         
         // 1. Read in the data.
+        inCommand = inRead.readLine (); 
         
         // 2. Slice and Dice the payload.
+        tokenizer = new StringTokenizer(inCommand);
         
         // 3. Bulid Params array.
-        
-        // 4. Set the state. 
-        
-        return null;
+        params.clear();
+        while (tokenizer.hasMoreTokens()) {
+            params.add(tokenizer.nextToken());    
+        }
+       
+        // 4. Set the state.  
+        switch (params.get(0)) {
+            case "CONNECT":
+                return FTPState.CONNECT;
+            case "LIST":
+                return FTPState.LIST;
+            case "RETR":
+                return FTPState.RETR;
+            case "QUIT":
+                return FTPState.QUIT;
+            default:
+                return FTPState.IDLE;
+        }
+       
     }
     
     
@@ -158,7 +192,7 @@ final class FTPSession implements Runnable
      *
      *****************************************************************/
     private void sendResponse (byte [] payload) {
-        
+        // TODO: Jake
     }
     
 }
