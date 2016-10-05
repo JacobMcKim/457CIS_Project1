@@ -184,15 +184,30 @@ final class FTPSession implements Runnable
        
     }
     
-    
     /******************************************************************
      * @Description - Called to send data back to the client. 
      *
      * @return payload - A byte array of the data to be sent back. 
      *
      *****************************************************************/
-    private void sendResponse (byte [] payload) {
-        // TODO: Jake
+    private void sendControlResponse (byte [] payload) throws Exception {
+        
+        // --- Variable Declarations  -------------------------------//
+        
+        /* The output stream were going to used to send the command response.*/ 
+        DataOutputStream outputResult = null;
+        
+        // --- Main Routine ----------------------------------------//
+        
+        // 1. Open output stream. 
+        outputResult = new DataOutputStream(socket.getOutputStream());
+        
+        // 2. Write data to the stream.
+        outputResult.write (payload,0,payload.length);
+    
+        // 2. Close the output stream.
+        outputResult.close();
+        
     }
     
 }
