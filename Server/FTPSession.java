@@ -210,4 +210,29 @@ final class FTPSession implements Runnable
         
     }
     
+    
+    /******************************************************************
+     * @Description - gets the names of the files located in the 
+     * directory and puts it into a string. It then passes the string
+     * to sendControlResponse().
+     * 
+     * ****************************************************************/
+    private void listCommand()throws Exception {
+
+        File folder = new File("/home/trevikri/cis_457_10/projects");
+        File[] listOfFiles = folder.listFiles();
+        
+        String fileString = "";
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                fileString = fileString + "File: " + listOfFiles[i].getName();
+            } else if (listOfFiles[i].isDirectory()) {
+                fileString = fileString + "Directory: " + listOfFiles[i].getName();
+            }
+        }
+        
+        sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
+    }
+    
 }
