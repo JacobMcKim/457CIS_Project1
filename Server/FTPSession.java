@@ -97,15 +97,15 @@ final class FTPSession implements Runnable
                         break;
                     
                     case LIST: 
-                        // TODO: Kristian
+                        listCommand();
                         break;
                     
                     case RETR: 
-                        // TODO: Kristian
+                        retrCommand();
                         break;
                     
                     case STORE: 
-                        // TODO: Kristian
+                        //storCommand();
                         break;
                     
                     case QUIT: 
@@ -233,6 +233,41 @@ final class FTPSession implements Runnable
         }
         
         sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
+    }
+    
+    /******************************************************************
+     * @Description - sends file specified by the client.
+     * 
+     * ****************************************************************/
+
+    private void retrCommand()throws Exception {
+
+        //need to figure out how to send a file from located in directory with maybe .equals
+
+        //filesToSend = params.get(1) but it needs to check that this is not NULL and it also needs to check whether you actually have this file,
+        //return a message back to the client if its one of these two things
+        
+        //send a message to client that tell what port number to connect to 
+        //once connection is established, send the file,
+        ServerSocket listenSocket = null;
+        Socket connectionSocket = listenSocket.accept();
+        
+        //BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+        DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+        
+        //String clientMessage = inFromClient.readLine();
+        try {
+            File clientFile = new File( params.get(1));
+            byte[] fileBytes = new byte[(int) clientFile.length()];
+            BufferedInputStream readFile = new BufferedInputStream(new FileInputStream(clientFile));
+            readFile.read(fileBytes, 0, fileBytes.length);
+
+            sendControlResponse(fileBytes);
+        }catch (Exception e){
+            String errorMessage = "File Not Found";
+            sendControlResponse(errorMessage.getBytes(StandardCharsets.UTF_8));
+
+        }
     }
     
 }
