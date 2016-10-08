@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 //===================================================================//
 // Class Definition                                                  //
 //===================================================================//
-public final class FTPServer {
+public final class FTP_Server {
     
     //---------------------------------------------------------------//
     // Class Atributes                                               //
