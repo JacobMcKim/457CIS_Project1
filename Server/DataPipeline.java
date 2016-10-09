@@ -44,6 +44,16 @@ public class DataPipeline{
 		server.close();
 	}
 	
+		
+    	boolean checkFileExists() throws IOException {
+    		File file = new File(fileName);
+        	if (file.exists()) {
+            		return true;
+        	}
+        	return false;
+    	}
+	
+	
 	public void receiveData()throws Exception{
 		Socket socket = new Socket(ipAddress, port);
 		byte[] contents = new byte[4096];
