@@ -88,32 +88,38 @@ public final class FTP_Client
                 switch (token.nextToken().toUpperCase()) {
                     
                     case "CONNECT":
-                        ftpCommandSocket = openFTPCmdConnection(token);
+                    
+                        // A. Attempt to open connection.
+                        if (ftpCommandSocket == null || !ftpCommandSocket.isConnected()) {
+                            ftpCommandSocket = openFTPCmdConnection(token);
                         
-                        if (ftpCommandSocket != null) {
-                            // A. Open readers.
-                            dataOut = new DataOutputStream(ftpCommandSocket.getOutputStream());
-                            dataIn = new BufferedReader(new InputStreamReader(ftpCommandSocket.getInputStream()));
-                            
-                            // B. Send Request to connet.
-                            sendCommandRequest (dataOut,"CONNECT"); 
-  
-                            // C. Get Response and handle it. 
-                            response = getCommandResponse (dataIn);
-  
-                            if (response.get(0).equals("SUCCESS")) {
-                                System.out.println("Connection Successful!");
+                            if (ftpCommandSocket != null) {
+                                // B. Open readers.
+                                dataOut = new DataOutputStream(ftpCommandSocket.getOutputStream());
+                                dataIn = new BufferedReader(new InputStreamReader(ftpCommandSocket.getInputStream()));
+                                
+                                // C. Send Request to connet.
+                                sendCommandRequest (dataOut,"CONNECT"); 
+      
+                                // D. Get Response and handle it. 
+                                response = getCommandResponse (dataIn);
+      
+                                if (response.get(0).equals("SUCCESS")) {
+                                    System.out.println("Connection Successful!");
+                                }
+                                else {
+                                    System.out.println("Unable to connect.");
+                                    ftpCommandSocket = null;
+                                }
+    
                             }
                             else {
-                                System.out.println("Unable to connect.");
-                                ftpCommandSocket = null;
+                                System.out.println ("Could not connect.");
                             }
-
                         }
                         else {
-                            System.out.println ("Could not connect.");
+                            System.out.println ("ERROR: Only one connection can be made at a time.\n close existing one by using QUIT command first.");
                         }
-                        
                     break;
                     
                     case "LIST":
