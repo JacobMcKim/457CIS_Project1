@@ -216,7 +216,7 @@ final class FTPSession implements Runnable
     }
     
     
-    /******************************************************************
+   /******************************************************************
      * @Description - gets the names of the files located in the 
      * directory and puts it into a string. It then passes the string
      * to the server. 
@@ -231,13 +231,20 @@ final class FTPSession implements Runnable
 
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile()) {
-                fileString = fileString + "File: " + listOfFiles[i].getName();
+                fileString = fileString + "File: " + listOfFiles[i].getName() +"\n";
             } else if (listOfFiles[i].isDirectory()) {
-                fileString = fileString + "Directory: " + listOfFiles[i].getName();
+                fileString = fileString + "Directory: " + listOfFiles[i].getName() + "\n";
             }
         }
         
-        dataOut.writeBytes(fileString +"\n");
+        /*String[] splitStr = fileString.split("\\s+");
+        
+        for(int i=0; i < splitStr.length; i++){
+            newString = splitStr[i];
+            System.out.println(newString + "\n");
+        }*/
+        
+        dataOut.writeBytes(fileString);
         //sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
     }
     
