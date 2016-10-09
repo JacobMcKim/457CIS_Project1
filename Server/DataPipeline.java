@@ -1,5 +1,3 @@
-package pck;
-
 import java.io.*;
 import java.net.*;
 
