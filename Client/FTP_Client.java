@@ -129,10 +129,18 @@ public final class FTP_Client
                             sendCommandRequest (dataOut,"LIST"); 
                             response = getCommandResponse (dataIn);
                             
+                            System.out.println ("\n------------------------------------------------");
+                            System.out.println ("Available Files");
+                            System.out.println ("------------------------------------------------");
+                           
+                           
                             // B. Echo back the result. 
-                            for(String listItem : response) {
-                                System.out.println(response);
+                            for (int i = 0; i < response.size(); i++) {
+                                System.out.println(response.get(i));
                             }
+                            
+                            System.out.println("");
+                            
                         }
                         else {
                             System.out.println("ERROR: A connection must be opened first using CONNECT command.");

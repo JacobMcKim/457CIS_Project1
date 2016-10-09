@@ -111,16 +111,19 @@ final class FTPSession implements Runnable
                     
                     case LIST: 
                         listCommand();
+                        System.out.println("LIST Command Requested From: " + socket.getRemoteSocketAddress().toString());
                         state = FTPState.IDLE;
                         break;
                     
                     case RETR: 
                         retrCommand();
+                        System.out.println("RETR Command Requested From: " + socket.getRemoteSocketAddress().toString());                  
                         state = FTPState.IDLE;
                         break;
                     
                     case STORE: 
                         storCommand();
+                        System.out.println("STORE Command Requested From: " + socket.getRemoteSocketAddress().toString());
                         state = FTPState.IDLE;
                         break;
                     
@@ -231,21 +234,13 @@ final class FTPSession implements Runnable
 
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile()) {
-                fileString = fileString + "File: " + listOfFiles[i].getName() +"\n";
+                fileString = fileString + "File:" + listOfFiles[i].getName() + " ";
             } else if (listOfFiles[i].isDirectory()) {
-                fileString = fileString + "Directory: " + listOfFiles[i].getName() + "\n";
+                fileString = fileString + "Directory:" + listOfFiles[i].getName() + " ";
             }
         }
-        
-        /*String[] splitStr = fileString.split("\\s+");
-        
-        for(int i=0; i < splitStr.length; i++){
-            newString = splitStr[i];
-            System.out.println(newString + "\n");
-        }*/
-        
-        dataOut.writeBytes(fileString);
-        //sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
+
+        dataOut.writeBytes(fileString + "\n");
     }
     
     /******************************************************************
