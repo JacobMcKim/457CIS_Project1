@@ -250,32 +250,10 @@ final class FTPSession implements Runnable
 
     private void retrCommand()throws Exception {
 
-        //need to figure out how to send a file from located in directory with maybe .equals
-
-        //filesToSend = params.get(1) but it needs to check that this is not NULL and it also needs to check whether you actually have this file,
-        //return a message back to the client if its one of these two things
-        
-        //send a message to client that tell what port number to connect to 
-        //once connection is established, send the file,
-        ServerSocket listenSocket = null;
-        Socket connectionSocket = listenSocket.accept();
-        
-        //BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-        DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-        
-        //String clientMessage = inFromClient.readLine();
-        try {
-            File clientFile = new File( params.get(1));
-            byte[] fileBytes = new byte[(int) clientFile.length()];
-            BufferedInputStream readFile = new BufferedInputStream(new FileInputStream(clientFile));
-            readFile.read(fileBytes, 0, fileBytes.length);
-
-            sendControlResponse(fileBytes);
-        }catch (Exception e){
-            String errorMessage = "File Not Found";
-            //sendControlResponse(errorMessage.getBytes(StandardCharsets.UTF_8));
-
-        }
+        String fileName = params.get(1);
+        int portNum = params.get(2);
+        DataPipeline dp = new DataPipeline(fileName, portNum, "127.0.0.1"));
+        dp.sendData();
     }
     
      /******************************************************************
@@ -285,8 +263,9 @@ final class FTPSession implements Runnable
     
     private void storCommand()throws Exception {
 
-        //DataPipeline dp = new DataPipeline(6789, "127.0.0.1");
-        //dp.receiveData();
+        int portNum = params.get(2);
+        DataPipeline dp = new DataPipeline(portNum, "127.0.0.1");
+        dp.receiveData();
             
     }
     
