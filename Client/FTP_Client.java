@@ -58,6 +58,15 @@ public final class FTP_Client
         
         /* The response data back from the server.                  */
         ArrayList <String> response = new ArrayList<String>();
+            
+        /* The ouput stream were going to keep open.                */
+        DataOutputStream dataOut = null;
+        
+        /* The input stream were going to keep open.                */
+        BufferedReader dataIn = null; 
+        
+        /* Whether or not were connected to the server.             */
+        boolean isConnected = false;
         
         // --- Main Routine ----------------------------------------//
         
@@ -73,7 +82,6 @@ public final class FTP_Client
                 System.out.print("FTP Client:>");
                 userInput = br.readLine();
                 token = new StringTokenizer (userInput);
-                //System.out.println (token.nextToken());
                 
                 
                 // B. Select which action to take and take it.
@@ -81,16 +89,29 @@ public final class FTP_Client
                     
                     case "CONNECT":
                         ftpCommandSocket = openFTPCmdConnection(token);
+                        
                         if (ftpCommandSocket != null) {
-                            sendCommandRequest (ftpCommandSocket,"CONNECT".getBytes());  
-                            response = getCommandResponse (ftpCommandSocket);
+                            // A. Open readers.
+                            dataOut = new DataOutputStream(ftpCommandSocket.getOutputStream());
+                            dataIn = new BufferedReader(new InputStreamReader(ftpCommandSocket.getInputStream()));
                             
-                            if (response.get(0) == "SUCCESS") {
+                            // B. Send Request to connet.
+                            sendCommandRequest (dataOut,"CONNECT"); 
+  
+                            // C. Get Response and handle it. 
+                            response = getCommandResponse (dataIn);
+  
+                            if (response.get(0).equals("SUCCESS")) {
                                 System.out.println("Connection Successful!");
                             }
                             else {
                                 System.out.println("Unable to connect.");
+                                ftpCommandSocket = null;
                             }
+
+                        }
+                        else {
+                            System.out.println ("Could not connect.");
                         }
                         
                     break;
@@ -98,31 +119,49 @@ public final class FTP_Client
                     case "LIST":
                         
                         // A. Preform request.
-                        sendCommandRequest (ftpCommandSocket,"LIST".getBytes()); 
-                        response = getCommandResponse (ftpCommandSocket);
-                        
-                        // B. Echo back the result. 
-                        for(String listItem : response) {
-                            System.out.println(response);
+                        if (ftpCommandSocket != null) {
+                            sendCommandRequest (dataOut,"LIST"); 
+                            response = getCommandResponse (dataIn);
+                            
+                            // B. Echo back the result. 
+                            for(String listItem : response) {
+                                System.out.println(response);
+                            }
+                        }
+                        else {
+                            System.out.println("ERROR: A connection must be opened first using CONNECT command.");
                         }
 
                     break;
                     
                     case "RETR":
-                        System.out.println("retrieving...");
-                        // TODO send request, wait for port number.
-                        
+                        if (ftpCommandSocket != null) {
+                            System.out.println("retrieving...");
+                            // TODO send request, wait for port number.
+                        }
+                        else {
+                            System.out.println("ERROR: A connection must be opened first using CONNECT command.");
+                        }
                     break;
                     
                     case "STORE":
-                        System.out.println("storing...");
-                        // TODO send request, wait for port number, send file.
+                        if (ftpCommandSocket != null) {
+                            System.out.println("storing...");
+                            // TODO send request, wait for port number.
+                        }
+                        else {
+                            System.out.println("ERROR: A connection must be opened first using CONNECT command.");
+                        }
+                        
                     break;
                     
                     case "QUIT":
                         if (ftpCommandSocket != null) {
-                            sendCommandRequest (ftpCommandSocket,"QUIT".getBytes());  
+                            sendCommandRequest (dataOut,"QUIT");  
+                            dataOut.close();
+                            dataIn.close();
                             ftpCommandSocket.close();
+                            ftpCommandSocket = null;
                             System.out.println("quiting connection...");
                         }
                         else {
@@ -132,9 +171,14 @@ public final class FTP_Client
                     break;
                     
                     case "EXIT":
+                    
+                        // A. Close any open connections if we have any.
                         if (ftpCommandSocket != null) {
-                            sendCommandRequest (ftpCommandSocket,"QUIT".getBytes());  
+                            sendCommandRequest (dataOut,"QUIT");
+                            dataOut.close();
+                            dataIn.close();
                             ftpCommandSocket.close();
+                            ftpCommandSocket = null;
                             System.out.println("quiting connection...");
                         }
                         System.out.println("Exiting.");
@@ -177,55 +221,63 @@ public final class FTP_Client
         // --- Variable Declarations  -------------------------------//
         
         /* The ip address we want to connect too.               */
-        String ipAddress = tok.nextToken();
+        String ipAddress = "";
         
         /* The port number we want to connect to.               */   
-        String port = tok.nextToken ();
+        String port = "";
         
         /* The attempted socket we will try to open.            */
         Socket s = null;
         
         // --- Main Routine ----------------------------------------//
         
-        // See if the port can be opened.
+        // A. Get the tokens.
+        if (tok.hasMoreTokens()) {
+            ipAddress = tok.nextToken();
+            if (tok.hasMoreTokens()) {
+                port = tok.nextToken ();
+            }
+        }
+        
+        // B. Check the input.
+        if (ipAddress == null || ipAddress.isEmpty() || port == null || port.isEmpty()) {
+            System.out.println("CONNECT ERROR: Ip address / port number are invalid.");
+            return null;
+        }
+        
+        // C. See if the port can be opened.
         try {
              return new Socket(ipAddress,Integer.parseInt(port));
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
+            return null;
         }
       
-        return null;
     }
     
     
     /******************************************************************
      * @Description - Called to send command data to the server.
      *
-     * @Parameter S- the socket connection to pull data from.
+     * @Parameter dataOut - the output stream to send info.
      *
      * @Parameter Payload - the data to send.
      *
      * @return payload - A byte array of the data to be sent back. 
      *
      *****************************************************************/
-    private static void sendCommandRequest (Socket s,byte [] payload) throws Exception {
+    private static void sendCommandRequest (DataOutputStream dataOut,String payload) throws Exception {
         
         // --- Variable Declarations  -------------------------------//
         
-        /* The output stream were going to used to send the command response.*/ 
-        DataOutputStream outputResult = null;
+        /* N/A                                                      */
         
         // --- Main Routine ----------------------------------------//
-        
-        // 1. Open output stream. 
-        outputResult = new DataOutputStream(s.getOutputStream());
-        
+      
         // 2. Write data to the stream.
-        outputResult.write (payload,0,payload.length);
-    
-        // 2. Close the output stream.
-        outputResult.close();
+        dataOut.writeBytes (payload + "\n");
+        dataOut.flush();
         
     }
     
@@ -234,17 +286,14 @@ public final class FTP_Client
      * @Description - Gets the response from the server and puts it 
      * into a parsable format.
      *
-     * @Parameter S- the socket connection to pull data from.
+     * @Parameter dataIn - The input stream buffered reader.
      *
      * @return payload - An ArrayList of command strings.
      *
      *****************************************************************/
-    private static ArrayList<String> getCommandResponse (Socket s) throws Exception {
+    private static ArrayList<String> getCommandResponse (BufferedReader dataIn) throws Exception {
         
         // --- Variable Declarations  -------------------------------//
-        
-        /* The buffered reader to pull data in.                     */
-        BufferedReader inBR = null;
         
         /* The raw input of the string.                             */
         String rawInput = "";
@@ -252,13 +301,13 @@ public final class FTP_Client
         /* The incomming data after it is parsed.                   */
         ArrayList <String> commandResponse = new ArrayList <String> ();
         
+        /* The tokenizer used to parse the command response.        */
         StringTokenizer token = null;
         
         // --- Main Routine ----------------------------------------//
         
         // 1. Open the input stream and read from it.
-        inBR = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        rawInput = inBR.readLine();
+        rawInput = dataIn.readLine();
         token = new StringTokenizer (rawInput);
 
         // 2. parse until out of tokens.
@@ -266,10 +315,9 @@ public final class FTP_Client
             commandResponse.add(token.nextToken());
         }
         
+        // 3. Return the result of connection.
         return commandResponse;
-        
-        
-        
+
     }
     
     /******************************************************************

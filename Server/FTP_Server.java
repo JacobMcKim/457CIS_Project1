@@ -36,7 +36,7 @@ public final class FTP_Server {
     //---------------------------------------------------------------//
     
     /* The port that the server will be listening for new requests on.*/
-    private static final int commandPort = 21;
+    private static final int commandPort = 9727;
     
     /* The Server socket that the commands will be communicated over. */
     private static ServerSocket commandSocket = null;
@@ -58,6 +58,7 @@ public final class FTP_Server {
     
     // 2. Process HTTP service requests in an infinite loop.
     while (true) {
+        
         // A. Listen for a TCP connection request.
         Socket connection = commandSocket.accept();
         
