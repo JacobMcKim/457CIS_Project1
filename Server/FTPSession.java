@@ -47,8 +47,14 @@ final class FTPSession implements Runnable
     /* The socket that we want to open.                              */ 
     Socket socket = null; 
     
+    /* The ouput stream were going to keep open.                     */
+    DataOutputStream dataOut = null;
+    
+    /* The input stream were going to keep open.                     */
+    BufferedReader dataIn = null; 
+    
     /* The parameter that is passed with the variable.               */
-    private ArrayList<String> params; 
+    private ArrayList<String> params = new ArrayList<String> (); 
     
     //---------------------------------------------------------------//
     // Constructor/Destructors                                       //
@@ -67,6 +73,7 @@ final class FTPSession implements Runnable
     public FTPSession(Socket socket)
     {
         this.socket = socket;
+        
     }
     
     //---------------------------------------------------------------//
@@ -76,6 +83,10 @@ final class FTPSession implements Runnable
     public void run () {
       
         try {
+            
+            // 1. open data streams.
+            dataOut = new DataOutputStream(socket.getOutputStream());
+            dataIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
             // Loop While the connection is open.
             while (isActive) {
@@ -93,24 +104,29 @@ final class FTPSession implements Runnable
                         break;
                     
                     case CONNECT: 
-                        // TODO: Josh
+                        dataOut.writeBytes("SUCCESS\n");
+                        System.out.println("Connection Opened From: " + socket.getRemoteSocketAddress().toString());
+                        state = FTPState.IDLE;
                         break;
                     
                     case LIST: 
                         listCommand();
+                        state = FTPState.IDLE;
                         break;
                     
                     case RETR: 
                         retrCommand();
+                        state = FTPState.IDLE;
                         break;
                     
                     case STORE: 
                         storCommand();
+                        state = FTPState.IDLE;
                         break;
                     
                     case QUIT: 
-                        // TODO: Josh
                         isActive = false;
+                        System.out.println("Connection Closed From: " + socket.getRemoteSocketAddress().toString());
                         break;
                 }
             }
@@ -120,9 +136,10 @@ final class FTPSession implements Runnable
     }
     
     catch (Exception e) {
-
+        System.out.println(e.getMessage());
     }
-        
+    
+    System.out.println("Terminating Session Object.");
         
     }
 
@@ -147,17 +164,11 @@ final class FTPSession implements Runnable
         
         /* The string variable to store input data into.            */
         String inCommand = "";
-    
-        /* The input buffer to pull all the data from.              */
-        InputStream stream = socket.getInputStream ();
-        
-        /* The buffer reader used to pull in the data.              */
-        BufferedReader inRead = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         
         // --- Main Routine ----------------------------------------//
         
         // 1. Read in the data.
-        inCommand = inRead.readLine (); 
+        inCommand = dataIn.readLine (); 
         
         // 2. Slice and Dice the payload.
         tokenizer = new StringTokenizer(inCommand);
@@ -187,26 +198,20 @@ final class FTPSession implements Runnable
     /******************************************************************
      * @Description - Called to send data back to the client. 
      *
-     * @return payload - A byte array of the data to be sent back. 
+     * @return payload - A string of the data to be sent back. 
      *
      *****************************************************************/
     private void sendControlResponse (byte [] payload) throws Exception {
         
         // --- Variable Declarations  -------------------------------//
         
-        /* The output stream were going to used to send the command response.*/ 
-        DataOutputStream outputResult = null;
+        /* N/A                                                      */
         
         // --- Main Routine ----------------------------------------//
-        
-        // 1. Open output stream. 
-        outputResult = new DataOutputStream(socket.getOutputStream());
-        
-        // 2. Write data to the stream.
-        outputResult.write (payload,0,payload.length);
-    
-        // 2. Close the output stream.
-        outputResult.close();
+       
+        // Write data to the stream.
+        //dataOut.writeBytes (payload + "\n");
+        dataOut.flush();
         
     }
     
@@ -214,7 +219,7 @@ final class FTPSession implements Runnable
     /******************************************************************
      * @Description - gets the names of the files located in the 
      * directory and puts it into a string. It then passes the string
-     * to sendControlResponse().
+     * to the server. 
      * 
      * ****************************************************************/
     private void listCommand()throws Exception {
@@ -232,7 +237,8 @@ final class FTPSession implements Runnable
             }
         }
         
-        sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
+        dataOut.writeBytes(fileString +"\n");
+        //sendControlResponse(fileString.getBytes(StandardCharsets.UTF_8));
     }
     
     /******************************************************************
@@ -265,7 +271,7 @@ final class FTPSession implements Runnable
             sendControlResponse(fileBytes);
         }catch (Exception e){
             String errorMessage = "File Not Found";
-            sendControlResponse(errorMessage.getBytes(StandardCharsets.UTF_8));
+            //sendControlResponse(errorMessage.getBytes(StandardCharsets.UTF_8));
 
         }
     }
@@ -277,8 +283,8 @@ final class FTPSession implements Runnable
     
     private void storCommand()throws Exception {
 
-        DataPipeline dp = new DataPipeline(6789, "127.0.0.1");
-        dp.receiveData();
+        //DataPipeline dp = new DataPipeline(6789, "127.0.0.1");
+        //dp.receiveData();
             
     }
     
