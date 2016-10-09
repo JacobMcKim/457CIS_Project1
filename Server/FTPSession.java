@@ -225,7 +225,7 @@ final class FTPSession implements Runnable
      * to the server. 
      * 
      * ****************************************************************/
-    private void listCommand()throws Exception {
+    private void listCommand() throws Exception {
 
         File folder = new File(System.getProperty("user.dir"));
         File[] listOfFiles = folder.listFiles();
@@ -251,9 +251,19 @@ final class FTPSession implements Runnable
     private void retrCommand()throws Exception {
 
         String fileName = params.get(1);
-        int portNum = params.get(2);
-        DataPipeline dp = new DataPipeline(fileName, portNum, "127.0.0.1"));
-        dp.sendData();
+        int portNum = Integer.parseInt(params.get(2));
+        
+        DataPipeline dp = new DataPipeline(fileName, portNum, socket.getRemoteSocketAddress().toString());
+        
+        // Check and send file.
+        if (dp.checkFileExists()) {
+            dataOut.writeBytes("READY\n");
+            dp.sendData();
+        }
+        else {
+            dataOut.writeBytes("FILENOTFOUND\n");
+        }
+        
     }
     
      /******************************************************************
@@ -262,9 +272,11 @@ final class FTPSession implements Runnable
      * ****************************************************************/
     
     private void storCommand()throws Exception {
-
-        int portNum = params.get(2);
-        DataPipeline dp = new DataPipeline(portNum, "127.0.0.1");
+        String fileName = params.get(1);
+        int portNum = Integer.parseInt(params.get(2));
+        
+        DataPipeline dp = new DataPipeline(fileName, portNum);
+        dataOut.writeBytes("READY\n");
         dp.receiveData();
             
     }

@@ -65,8 +65,13 @@ public final class FTP_Client
         /* The input stream were going to keep open.                */
         BufferedReader dataIn = null; 
         
-        /* Whether or not were connected to the server.             */
-        boolean isConnected = false;
+        /* The file name we want to send or recive.                 */
+        String fileName = "";
+        
+        /* The port number we want to preform the data connection. */
+        int dataPort = 6789;
+        
+        DataPipeline ftpData = null;
         
         // --- Main Routine ----------------------------------------//
         
@@ -150,22 +155,75 @@ public final class FTP_Client
                     
                     case "RETR":
                         if (ftpCommandSocket != null) {
-                            System.out.println("retrieving...");
-                            // TODO send request, wait for port number.
+               
+                            // A. get file name and port # to use and send.
+                            if (token.hasMoreTokens()) {
+                                fileName = token.nextToken();
+                                ftpData = new DataPipeline(fileName,dataPort);
+                                sendCommandRequest (dataOut, "RETR "+ fileName + " " + dataPort);
+                                System.out.println("retrieving...");
+                            }
+                            
+                            // B. Get response and determine whether or not we will open command stream.
+                            response = getCommandResponse (dataIn);
+                            if (response.get(0).equals("READY")) {
+                                ftpData.receiveData();
+                            }
+                            
+                            else if (response.get(0).equals("FILENOTFOUND")) {
+                                System.out.println("ERROR: File doesn't exist on remote server.");
+                            }
+                            else {
+                                System.out.println("ERROR: could not tranfer file.");
+                            }
+                            
                         }
                         else {
                             System.out.println("ERROR: A connection must be opened first using CONNECT command.");
                         }
+                        
+                        // C. Destroy the data pipeline.
+                        ftpData = null;
+                        
                     break;
                     
                     case "STORE":
                         if (ftpCommandSocket != null) {
-                            System.out.println("storing...");
-                            // TODO send request, wait for port number.
+                            // A. get file name and port # to use and send.
+                            if (token.hasMoreTokens()) {
+                                fileName = token.nextToken();
+                               
+                                ftpData = new DataPipeline(fileName,dataPort,ftpCommandSocket.getRemoteSocketAddress().toString());
+                                // TODO: Check if file exists first?
+                                if (ftpData.checkFileExists())    
+                                {
+                                    sendCommandRequest (dataOut, "STORE " + fileName + " " + dataPort);
+                                    System.out.println("Storing...");   
+                                    
+                                    // B. Get response and determine whether or not we will open command stream.
+                                    response = getCommandResponse (dataIn);
+                                    if (response.get(0).equals("READY")) {
+                                        ftpData.sendData();
+                                    }
+                                    else {
+                                        System.out.println("ERROR: There was an error sending file.");
+                                    }
+                                }
+                                
+                                else {
+                                    System.out.println("ERROR: File doesn't exist.");
+                                }
+                                
+                            }
+                            
+                            
                         }
                         else {
                             System.out.println("ERROR: A connection must be opened first using CONNECT command.");
                         }
+                        
+                        // C. Destroy the data pipeline.
+                        ftpData = null;
                         
                     break;
                     
