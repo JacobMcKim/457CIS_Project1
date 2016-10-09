@@ -105,7 +105,7 @@ final class FTPSession implements Runnable
                         break;
                     
                     case STORE: 
-                        //storCommand();
+                        storCommand();
                         break;
                     
                     case QUIT: 
@@ -219,7 +219,7 @@ final class FTPSession implements Runnable
      * ****************************************************************/
     private void listCommand()throws Exception {
 
-        File folder = new File("/home/trevikri/cis_457_10/projects");
+        File folder = new File(System.getProperty("user.dir"));
         File[] listOfFiles = folder.listFiles();
         
         String fileString = "";
@@ -268,6 +268,18 @@ final class FTPSession implements Runnable
             sendControlResponse(errorMessage.getBytes(StandardCharsets.UTF_8));
 
         }
+    }
+    
+     /******************************************************************
+     * @Description - Recieves a file sent by the client. 
+     * 
+     * ****************************************************************/
+    
+    private void storCommand()throws Exception {
+
+        DataPipeline dp = new DataPipeline(6789, "127.0.0.1");
+        dp.receiveData();
+            
     }
     
 }
