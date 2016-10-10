@@ -166,6 +166,7 @@ public final class FTP_Client
                             
                             // B. Get response and determine whether or not we will open command stream.
                             response = getCommandResponse (dataIn);
+                            
                             if (response.get(0).equals("READY")) {
                                 ftpData.receiveData();
                             }
@@ -194,7 +195,8 @@ public final class FTP_Client
                                 fileName = token.nextToken();
                                
                                 ftpData = new DataPipeline(fileName,dataPort,ftpCommandSocket.getRemoteSocketAddress().toString());
-                                // TODO: Check if file exists first?
+
+                                // Check if the file exits.
                                 if (ftpData.checkFileExists())    
                                 {
                                     sendCommandRequest (dataOut, "STORE " + fileName + " " + dataPort);

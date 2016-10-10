@@ -190,6 +190,8 @@ final class FTPSession implements Runnable
                 return FTPState.LIST;
             case "RETR":
                 return FTPState.RETR;
+            case "STORE":
+                return FTPState.STORE;
             case "QUIT":
                 return FTPState.QUIT;
             default:
@@ -274,7 +276,6 @@ final class FTPSession implements Runnable
     private void storCommand()throws Exception {
         String fileName = params.get(1);
         int portNum = Integer.parseInt(params.get(2));
-        
         DataPipeline dp = new DataPipeline(fileName, portNum);
         dataOut.writeBytes("READY\n");
         dp.receiveData();
