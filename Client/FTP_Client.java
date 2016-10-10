@@ -401,7 +401,7 @@ public final class FTP_Client
      * @return N/A.
      *
      *****************************************************************/
-    public static void printHelpMenu () {
+    private static void printHelpMenu () {
         
         // --- Variable Declarations  -------------------------------//
 

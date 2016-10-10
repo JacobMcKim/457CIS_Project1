@@ -200,26 +200,6 @@ final class FTPSession implements Runnable
        
     }
     
-    /******************************************************************
-     * @Description - Called to send data back to the client. 
-     *
-     * @return payload - A string of the data to be sent back. 
-     *
-     *****************************************************************/
-    private void sendControlResponse (byte [] payload) throws Exception {
-        
-        // --- Variable Declarations  -------------------------------//
-        
-        /* N/A                                                      */
-        
-        // --- Main Routine ----------------------------------------//
-       
-        // Write data to the stream.
-        //dataOut.writeBytes (payload + "\n");
-        dataOut.flush();
-        
-    }
-    
     
    /******************************************************************
      * @Description - gets the names of the files located in the 

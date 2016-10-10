@@ -61,7 +61,7 @@ public class DataPipeline{
         socket.close();
     }
     
-    boolean checkFileExists() throws IOException {
+    public boolean checkFileExists() throws IOException {
         File file = new File(fileName);
         if (file.exists()) {
             return true;
